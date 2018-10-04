@@ -20,6 +20,7 @@
  *
  *****************************************************************************/
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -977,6 +978,9 @@ sakura_child_exited (GtkWidget *widget, void *data)
 	/* Only write configuration to disk if it's the last tab */
 	if (npages==1) {
 		sakura_config_done();
+	} else if (npages==0) {
+	    assert(term == NULL);
+	    return;
 	}
 
 	if (option_hold==TRUE) {
