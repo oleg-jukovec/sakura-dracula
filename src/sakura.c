@@ -232,6 +232,31 @@ const GdkRGBA rxvt_palette[PALETTE_SIZE] = {
     {1,        1,        1,        1 }
 };
 
+#define COLOR(color) ((double)(color) / 255)
+#define RGB(red, green, blue) {COLOR(red), COLOR(green), COLOR(blue), 1}
+
+// source https://github.com/dracula/xresources/blob/master/Xresources
+const GdkRGBA dracula_palette[PALETTE_SIZE] = {
+    RGB(0x00, 0x00, 0x00), // 0
+    RGB(0xFF, 0x55, 0x55), // 1
+    RGB(0x50, 0xFA, 0x7B), // 2
+    RGB(0xF1, 0xFA, 0x8C), // 3
+    RGB(0xBD, 0x93, 0xF9), // 4
+    RGB(0xFF, 0x79, 0xC6), // 5
+    RGB(0x8B, 0xE9, 0xFD), // 6
+    RGB(0xBF, 0xBF, 0xBF), // 7
+    RGB(0x4D, 0x4D, 0x4D), // 8
+    RGB(0xFF, 0x6E, 0x67), // 9
+    RGB(0x5A, 0xF7, 0x8E), // 10
+    RGB(0xF4, 0xF9, 0x9D), // 11
+    RGB(0xCA, 0xA9, 0xFA), // 12
+    RGB(0xFF, 0x92, 0xD0), // 13
+    RGB(0x9A, 0xED, 0xFE), // 14
+    RGB(0xE6, 0xE6, 0xE6)  // 15
+};
+
+#undef RGB
+#undef COLOR
 
 #define HIG_DIALOG_CSS "* {\n"\
 	"-GtkDialog-action-area-border : 12;\n"\
@@ -353,7 +378,7 @@ struct terminal {
 #define DEFAULT_FONT "Ubuntu Mono,monospace 12"
 #define FONT_MINIMAL_SIZE (PANGO_SCALE*6)
 #define DEFAULT_WORD_CHARS "-,./?%&#_~:"
-#define DEFAULT_PALETTE "solarized_dark"
+#define DEFAULT_PALETTE "dracula"
 #define TAB_MAX_SIZE 40
 #define TAB_MIN_SIZE 6
 #define FORWARD 1
@@ -1912,6 +1937,8 @@ sakura_set_palette(GtkWidget *widget, void *data)
 			sakura.palette=tango_palette;
 		} else if (strcmp(palette, "solarized_dark")==0) {
 			sakura.palette=solarized_dark_palette;
+		} else if (strcmp(palette, "dracula")==0) {
+			sakura.palette=dracula_palette;
 		} else {
 			sakura.palette=solarized_light_palette;	
 		}
@@ -2221,7 +2248,7 @@ sakura_init()
 
 		sprintf(temp_name, "colorset%d_fore", i+1);
 		if (!g_key_file_has_key(sakura.cfg, cfg_group, temp_name, NULL)) {
-			sakura_set_config_string(temp_name, "rgb(192,192,192)");
+			sakura_set_config_string(temp_name, "rgb(248,248,242)");
 		}
 		cfgtmp = g_key_file_get_value(sakura.cfg, cfg_group, temp_name, NULL);
 		gdk_rgba_parse(&sakura.forecolors[i], cfgtmp);
@@ -2229,7 +2256,7 @@ sakura_init()
 
 		sprintf(temp_name, "colorset%d_back", i+1);
 		if (!g_key_file_has_key(sakura.cfg, cfg_group, temp_name, NULL)) {
-			sakura_set_config_string(temp_name, "rgba(0,0,0,1)");
+			sakura_set_config_string(temp_name, "rgba(40,42,54,1)");
 		}
 		cfgtmp = g_key_file_get_value(sakura.cfg, cfg_group, temp_name, NULL);
 		gdk_rgba_parse(&sakura.backcolors[i], cfgtmp);
@@ -2237,7 +2264,7 @@ sakura_init()
 
 		sprintf(temp_name, "colorset%d_curs", i+1);
 		if (!g_key_file_has_key(sakura.cfg, cfg_group, temp_name, NULL)) {
-			sakura_set_config_string(temp_name, "rgb(255,255,255)");
+			sakura_set_config_string(temp_name, "rgb(248,248,242)");
 		}
 		cfgtmp = g_key_file_get_value(sakura.cfg, cfg_group, temp_name, NULL);
 		gdk_rgba_parse(&sakura.curscolors[i], cfgtmp);
@@ -2370,6 +2397,8 @@ sakura_init()
 		sakura.palette=tango_palette;
 	} else if (strcmp(cfgtmp, "solarized_dark")==0) {
 		sakura.palette=solarized_dark_palette;
+	} else if (strcmp(cfgtmp, "dracula")==0) {
+		sakura.palette=dracula_palette;
 	} else {
 		sakura.palette=solarized_light_palette;
 	}
@@ -2632,7 +2661,7 @@ sakura_init_popup()
 	          *item_blinking_cursor, *item_allow_bold, *item_other_options, 
 	          *item_cursor, *item_cursor_block, *item_cursor_underline, *item_cursor_ibeam,
 	          *item_palette, *item_palette_tango, *item_palette_linux, *item_palette_xterm, *item_palette_rxvt,
-	          *item_palette_solarized_dark, *item_palette_solarized_light, *item_palette_gruvbox,
+	          *item_palette_solarized_dark, *item_palette_solarized_light, *item_palette_gruvbox, *item_palette_dracula,
 	          *item_show_close_button, *item_tabs_on_bottom, *item_less_questions,
 	          *item_disable_numbered_tabswitch, *item_use_fading, *item_stop_tab_cycling_at_end_tabs;
 	GtkWidget *options_menu, *other_options_menu, *cursor_menu, *palette_menu;
@@ -2676,6 +2705,7 @@ sakura_init_popup()
 	item_palette_xterm=gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(item_palette_tango), "Xterm");
 	item_palette_rxvt=gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(item_palette_tango), "rxvt");
 	item_palette_solarized_dark=gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(item_palette_tango), "Solarized dark");
+	item_palette_dracula=gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(item_palette_tango), "Dracula");
 	item_palette_solarized_light=gtk_radio_menu_item_new_with_label_from_widget(GTK_RADIO_MENU_ITEM(item_palette_tango), "Solarized light");
 
 	/* Show defaults in menu items */
@@ -2767,6 +2797,8 @@ sakura_init_popup()
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item_palette_rxvt), TRUE);
 	} else if (strcmp(cfgtmp, "solarized_dark")==0) {
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item_palette_solarized_dark), TRUE);
+	} else if (strcmp(cfgtmp, "dracula")==0) {
+		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item_palette_dracula), TRUE);
 	} else {
 		gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item_palette_solarized_light), TRUE);
 	}
@@ -2827,6 +2859,7 @@ sakura_init_popup()
 	gtk_menu_shell_append(GTK_MENU_SHELL(palette_menu), item_palette_xterm);
 	gtk_menu_shell_append(GTK_MENU_SHELL(palette_menu), item_palette_rxvt);
 	gtk_menu_shell_append(GTK_MENU_SHELL(palette_menu), item_palette_solarized_dark);
+	gtk_menu_shell_append(GTK_MENU_SHELL(palette_menu), item_palette_dracula);
 	gtk_menu_shell_append(GTK_MENU_SHELL(palette_menu), item_palette_solarized_light);
 
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item_options), options_menu);
@@ -2866,6 +2899,7 @@ sakura_init_popup()
 	g_signal_connect(G_OBJECT(item_palette_xterm), "activate", G_CALLBACK(sakura_set_palette), "xterm");
 	g_signal_connect(G_OBJECT(item_palette_rxvt), "activate", G_CALLBACK(sakura_set_palette), "rxvt");
 	g_signal_connect(G_OBJECT(item_palette_solarized_dark), "activate", G_CALLBACK(sakura_set_palette), "solarized_dark");
+	g_signal_connect(G_OBJECT(item_palette_dracula), "activate", G_CALLBACK(sakura_set_palette), "dracula");
 	g_signal_connect(G_OBJECT(item_palette_solarized_light), "activate", G_CALLBACK(sakura_set_palette), "solarized_light");
 
 	g_signal_connect(G_OBJECT(sakura.item_open_mail), "activate", G_CALLBACK(sakura_open_mail), NULL);
