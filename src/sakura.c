@@ -1037,7 +1037,7 @@ sakura_eof (GtkWidget *widget, void *data)
 		npages = gtk_notebook_get_n_pages(GTK_NOTEBOOK(sakura.notebook));
 		if (npages==0)
 			sakura_destroy();
-	}	
+	}
 }
 
 /* This handler is called when window title changes, and is used to change window and notebook pages titles */
@@ -2919,21 +2919,28 @@ sakura_init_popup()
 static void
 sakura_destroy()
 {
+	static bool destroy = false;
+
 	SAY("Destroying sakura");
 
-	/* Delete all existing tabs */
-	while (gtk_notebook_get_n_pages(GTK_NOTEBOOK(sakura.notebook)) >= 1) {
-		sakura_del_tab(-1);
+	if (!destroy) {
+		/*
+		* It's ugly fix of SIGSEGV by recursive and secondary calls of the sakura_destroy().
+		* Maybe later I will make a better fix.
+		*/
+		destroy = true;
+		/* Delete all existing tabs */
+		while (gtk_notebook_get_n_pages(GTK_NOTEBOOK(sakura.notebook)) >= 1) {
+			sakura_del_tab(-1);
+		}
+
+		g_key_file_free(sakura.cfg);
+
+		pango_font_description_free(sakura.font);
+
+		free(sakura.configfile);
+		gtk_main_quit();
 	}
-
-	g_key_file_free(sakura.cfg);
-
-	pango_font_description_free(sakura.font);
-
-	free(sakura.configfile);
-
-	gtk_main_quit();
-
 }
 
 
